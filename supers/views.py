@@ -1,6 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from supertypes.models import SuperType
+
 from .serializers import SuperSerializer
 from .models import Super
 
@@ -35,16 +37,39 @@ from supers import serializers
 def supers_list(request):
     if request.method == 'GET' :
 
-        super_name = request.query_params.get('super_type')
-        print(super_name)
+        #super_name = request.query_params.get('super_type')
+        #print(super_name)
 
-        queryset = Super.objects.all()
+        #queryset = Super.objects.all()
 
-        if super_name :
-            queryset = queryset.filter(super_type__type = super_name)
+        #if super_name :
+        #    queryset = queryset.filter(super_type__type = super_name)
         
-        serializer = SuperSerializer(queryset, many = True)
-        return Response(serializer.data)
+        #serializer = SuperSerializer(queryset, many = True)
+        #return Response(serializer.data)
+
+        # aadding custom response : following Examples and Definitions
+        appending_dict_example ={}
+        appending_dict_example['name'] = 'Semi'
+        print(appending_dict_example)   # {name : 'Semi'}
+
+        super_types =SuperType.objects.all()
+
+        custom_response_dictionary = {}
+
+        for super_type in super_types :
+            supers = Super.objects.filter(supertype_id = super_type.id)
+            super_serializer = SuperSerializer(supers, many = True)
+
+            custom_response_dictionary[super_type.name] = {
+                "Type"   : super_type.type,
+                "supers" : super_serializer.data
+            }
+        return Response(custom_response_dictionary)
+
+
+
+
     
     elif request.method =='POST' :
         serializer = SuperSerializer(data = request.data)
